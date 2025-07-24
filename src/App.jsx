@@ -115,29 +115,25 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
       {/* Header with Logo */}
-      <header className="w-full bg-white border-b border-gray-100 flex flex-col items-center justify-center pt-8 pb-10">
-        <div className="flex flex-col items-center">
+      <header className="w-full px-10 bg-white border-b border-gray-100 flex flex-col items-center justify-center pt-8 pb-10">
+        <div className="flex flex-col md:flex-row items-center w-full gap-6 md:gap-12 justify-center md:justify-between px-2 md:px-0">
           <img 
-            src="/3D Logo.jpg" 
-            alt="Company Logo" 
-            className="h-56 w-auto rounded-2xl shadow-2xl object-contain mb-6"
+            src="/Asset 1.png" 
+            alt="Company Asset" 
+            className="h-20 w-auto md:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2 mb-4 md:mb-0"
           />
-          <div className="flex flex-row items-center justify-center gap-12">
-            <img 
-              src="/ICA-400.png" 
-              alt="ICA Certification" 
-              className="h-32 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2"
-            />
-            <img 
-              src="/Asset 1.png" 
-              alt="Company Asset" 
-              className="h-32 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2"
-            />
+          <div className="flex flex-col items-center justify-center text-center flex-1">
+            <h1 className="text-2xl md:text-4xl font-extrabold text-gray-800 mt-4 md:mt-8 mb-2">Your Canopy Calculator</h1>
+            <p className="text-base md:text-lg text-gray-700 max-w-xs md:max-w-2xl mx-auto">Get a ballpark estimate for your tree services. Fill out the form below to receive a detailed quote.</p>
           </div>
+          <img 
+            src="/ICA-400.png" 
+            alt="ICA Certification" 
+            className="h-20 w-auto md:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2 mt-4 md:mt-0"
+          />
         </div>
         {/* Optional: Add a title/subtitle below the logos */}
-        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 text-center mt-8 mb-2">Your Canopy Calculator</h1>
-        <p className="text-lg text-gray-700 text-center max-w-2xl mx-auto">Get a ballpark estimate for your tree services. Fill out the form below to receive a detailed quote.</p>
+        
       </header>
 
       <div className="py-8 px-4">
