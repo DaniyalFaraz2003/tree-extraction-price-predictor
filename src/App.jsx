@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import "./index.css";
-import treeRemovalData from './treeRemovalData.js';
+import processedData from './processed_output.json';
 
 export default function App() {
   // State management for all form fields
@@ -8,6 +8,7 @@ export default function App() {
   const [treeType, setTreeType] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [circumference, setCircumference] = useState('');
+  const [location, setLocation] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [priceEstimate, setPriceEstimate] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -16,6 +17,7 @@ export default function App() {
   const obstacleOptions = ['house', 'shed', 'fence', 'powerlines', 'garden'];
   const treeTypeOptions = ['leafy', 'pokey'];
   const serviceTypeOptions = ['tree trim', 'remove stump', 'both'];
+  const locationOptions = ['front', 'side', 'back'];
 
   // Handle obstacle selection (multiple choice)
   const handleObstacleChange = (obstacle) => {
@@ -28,48 +30,50 @@ export default function App() {
 
   // Real price calculation using treeRemovalData
   const calculatePrice = (formData) => {
+    // Find the correct index for circumference
     const circumference = parseFloat(formData.circumference);
     if (isNaN(circumference)) return 0;
-
-    // Find the correct data object for the circumference
-    const dataObj = treeRemovalData.find(obj => {
-      const [min, max] = obj.size.split('-').map(Number);
-      return circumference >= min && circumference <= max;
-    });
-    if (!dataObj) return 0;
-
-    let total = 0;
-
-    // Add tree type price
-    if (formData.treeType && dataObj[formData.treeType]) {
-      total += dataObj[formData.treeType];
+    let index = -1;
+    for (let i = 0; i < Object.keys(processedData['Size(In)']).length; i++) {
+      const range = processedData['Size(In)'][i.toString()];
+      const [min, max] = range.split('-').map(Number);
+      if (circumference >= min && circumference <= max) {
+        index = i;
+        break;
+      }
     }
-
-    // Add obstacles prices
+    if (index === -1) return 0;
+    let total = 0;
+    // Add base price (Leafy or Pokey)
+    const treeKey = formData.treeType ? (formData.treeType.charAt(0).toUpperCase() + formData.treeType.slice(1)) : '';
+    if (treeKey && processedData[treeKey] && processedData[treeKey][index.toString()]) {
+      total += processedData[treeKey][index.toString()];
+    }
+    // Add obstacle prices
     if (Array.isArray(formData.obstacles)) {
       formData.obstacles.forEach(obstacle => {
-        // Map UI obstacle names to data keys
         let key = obstacle;
-        if (key === 'house' || key === 'shed') key = 'houseShed';
-        if (dataObj[key]) {
-          total += dataObj[key];
+        if (key === 'house' || key === 'shed') key = 'House shed';
+        key = `${treeKey} - ${key.charAt(0).toUpperCase() + key.slice(1)}`;
+        if (processedData[key] && processedData[key][index.toString()]) {
+          total += processedData[key][index.toString()];
         }
       });
     }
-
-    // Add service type price
-    if (formData.serviceType) {
-      if (formData.serviceType === 'remove stump' && dataObj.stumpRemoval) {
-        total += dataObj.stumpRemoval;
+    // Add location price
+    if (formData.location) {
+      let locKey = formData.location.charAt(0).toUpperCase() + formData.location.slice(1);
+      let key = `${treeKey} - ${locKey}`;
+      if (processedData[key] && processedData[key][index.toString()]) {
+        total += processedData[key][index.toString()];
       }
-      // If both, add stumpRemoval and tree type again (if not already added)
-      if (formData.serviceType === 'both') {
-        if (dataObj.stumpRemoval) total += dataObj.stumpRemoval;
-        // Optionally, you can decide if tree type should be added again or not
-      }
-      // If 'tree trim', do nothing extra (already added tree type)
     }
-
+    // Add stump removal if needed
+    if (formData.serviceType) {
+      if ((formData.serviceType === 'remove stump' || formData.serviceType === 'both') && processedData['STUMP Removal'] && processedData['STUMP Removal'][index.toString()]) {
+        total += processedData['STUMP Removal'][index.toString()];
+      }
+    }
     return Math.round(total);
   };
 
@@ -78,7 +82,7 @@ export default function App() {
     e.preventDefault();
 
     // Validate form
-    if (!treeType || !serviceType || !circumference) {
+    if (!treeType || !serviceType || !circumference || !location) {
       alert('Please fill in all required fields');
       return;
     }
@@ -92,7 +96,8 @@ export default function App() {
       obstacles,
       treeType,
       serviceType,
-      circumference: parseFloat(circumference)
+      circumference: parseFloat(circumference),
+      location
     };
 
     const price = calculatePrice(formData);
@@ -155,38 +160,6 @@ export default function App() {
               <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
                 <form onSubmit={handleSubmit} className="space-y-8">
 
-                  {/* Obstacles Section */}
-                  <div className="space-y-4">
-                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
-                      <span className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                        ⚠️
-                      </span>
-                      Obstacles Near Tree
-                    </h2>
-                    <p className="text-gray-600">Select all obstacles that are near the tree:</p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                      {obstacleOptions.map((obstacle) => (
-                        <label key={obstacle} className="relative">
-                          <input
-                            type="checkbox"
-                            checked={obstacles.includes(obstacle)}
-                            onChange={() => handleObstacleChange(obstacle)}
-                            className="sr-only"
-                          />
-                          <div className={`
-                          cursor-pointer p-3 rounded-lg border-2 transition-all duration-200 text-center
-                          ${obstacles.includes(obstacle)
-                              ? 'border-red-500 bg-red-50 text-red-700'
-                              : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100'
-                            }
-                        `}>
-                            <div className="font-medium capitalize">{obstacle}</div>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Tree Type Section */}
                   <div className="space-y-4">
                     <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
@@ -206,13 +179,12 @@ export default function App() {
                             onChange={(e) => setTreeType(e.target.value)}
                             className="sr-only"
                           />
-                          <div className={`
-                          cursor-pointer p-6 rounded-xl border-2 transition-all duration-200
-                          ${treeType === type
+                          <div className={
+                            `cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 ` +
+                            (treeType === type
                               ? 'border-green-500 bg-green-50 text-green-700'
-                              : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100'
-                            }
-                        `}>
+                              : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100')
+                          }>
                             <div className="text-center">
                               <div className="text-3xl mb-2">
                                 {type === 'leafy' ? '🍃' : '🌲'}
@@ -222,6 +194,74 @@ export default function App() {
                                 {type === 'leafy' ? 'Broad-leaved trees' : 'Coniferous trees'}
                               </div>
                             </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Location Section */}
+                  <div className="space-y-4">
+                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+                      <span className="w-8 h-8 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                        📍
+                      </span>
+                      Location
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {locationOptions.map((loc) => (
+                        <label key={loc} className="relative">
+                          <input
+                            type="radio"
+                            name="location"
+                            value={loc}
+                            checked={location === loc}
+                            onChange={(e) => setLocation(e.target.value)}
+                            className="sr-only"
+                          />
+                          <div className={
+                            `cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 ` +
+                            (location === loc
+                              ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                              : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100')
+                          }>
+                            <div className="text-center">
+                              <div className="text-3xl mb-2">
+                                {loc === 'front' ? '🏡' : loc === 'side' ? '➡️' : '🏞️'}
+                              </div>
+                              <div className="font-semibold text-lg capitalize">{loc}</div>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Obstacles Section */}
+                  <div className="space-y-4">
+                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+                      <span className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                        ⚠️
+                      </span>
+                      Obstacles Near Tree
+                    </h2>
+                    <p className="text-gray-600">Select all obstacles that are near the tree:</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {obstacleOptions.map((obstacle) => (
+                        <label key={obstacle} className="relative">
+                          <input
+                            type="checkbox"
+                            checked={obstacles.includes(obstacle)}
+                            onChange={() => handleObstacleChange(obstacle)}
+                            className="sr-only"
+                          />
+                          <div className={
+                            `cursor-pointer p-3 rounded-lg border-2 transition-all duration-200 text-center ` +
+                            (obstacles.includes(obstacle)
+                              ? 'border-red-500 bg-red-50 text-red-700'
+                              : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100')
+                          }>
+                            <div className="font-medium capitalize">{obstacle}</div>
                           </div>
                         </label>
                       ))}
@@ -332,7 +372,7 @@ export default function App() {
                   Project Summary
                 </h3>
 
-                {(!obstacles.length && !treeType && !serviceType && !circumference) ? (
+                {(!obstacles.length && !treeType && !serviceType && !circumference && !location) ? (
                   <div className="text-center py-8">
                     <div className="text-4xl mb-3">📝</div>
                     <p className="text-gray-500">Fill out the form to see your project summary here</p>
@@ -401,6 +441,22 @@ export default function App() {
                       </div>
                     )}
 
+                    {/* Location Summary */}
+                    {location && (
+                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <h4 className="font-semibold text-yellow-800 mb-2 flex items-center">
+                          <span className="mr-2">📍</span>
+                          Location
+                        </h4>
+                        <div className="flex items-center">
+                          <span className="text-2xl mr-2">
+                            {location === 'front' ? '🏡' : location === 'side' ? '➡️' : '🏞️'}
+                          </span>
+                          <span className="capitalize font-medium">{location}</span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Quick Stats */}
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                       <h4 className="font-semibold text-gray-800 mb-3">Quick Stats</h4>
@@ -420,6 +476,10 @@ export default function App() {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Circumference:</span>
                           <span className="font-medium">{circumference ? `${circumference}"` : 'Not entered'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Location:</span>
+                          <span className="font-medium capitalize">{location || 'Not selected'}</span>
                         </div>
                       </div>
                     </div>
@@ -562,6 +622,11 @@ export default function App() {
                   <div className="flex justify-between items-center py-1 text-sm">
                     <span className="text-gray-600">Obstacles:</span>
                     <span className="font-medium">{obstacles.length} selected</span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-1 text-sm">
+                    <span className="text-gray-600">Location:</span>
+                    <span className="font-medium capitalize">{location}</span>
                   </div>
                 </div>
 
