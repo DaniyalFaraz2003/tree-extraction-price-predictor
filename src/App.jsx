@@ -16,8 +16,8 @@ export default function App() {
   // Available options
   const obstacleOptions = ['house', 'shed', 'fence', 'powerlines', 'garden'];
   const treeTypeOptions = ['leafy', 'pokey'];
-  const serviceTypeOptions = ['tree trim', 'remove stump', 'both'];
-  const locationOptions = ['front', 'side', 'back'];
+  const serviceTypeOptions = ['tree trim', 'tree removal', 'tree and stump removal'];
+  const locationOptions = ['front yard', 'side yard', 'backyard'];
 
   // Handle obstacle selection (multiple choice)
   const handleObstacleChange = (obstacle) => {
@@ -70,9 +70,11 @@ export default function App() {
     }
     // Add stump removal if needed
     if (formData.serviceType) {
-      if ((formData.serviceType === 'remove stump' || formData.serviceType === 'both') && processedData['STUMP Removal'] && processedData['STUMP Removal'][index.toString()]) {
+      if ((formData.serviceType === 'tree and stump removal') && processedData['STUMP Removal'] && processedData['STUMP Removal'][index.toString()]) {
         total += processedData['STUMP Removal'][index.toString()];
       }
+      // If only tree removal, do not add stump removal
+      // If only tree trim, do not add stump removal
     }
     return Math.round(total);
   };
@@ -115,25 +117,55 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
       {/* Header with Logo */}
-      <header className="w-full px-10 bg-white border-b border-gray-100 flex flex-col items-center justify-center pt-8 pb-10">
-        <div className="flex flex-col md:flex-row items-center w-full gap-6 md:gap-12 justify-center md:justify-between px-2 md:px-0">
-          <img 
-            src="/Asset 1.png" 
-            alt="Company Asset" 
-            className="h-20 w-auto md:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2 mb-4 md:mb-0"
-          />
-          <div className="flex flex-col items-center justify-center text-center flex-1">
-            <h1 className="text-2xl md:text-4xl font-extrabold text-gray-800 mt-4 md:mt-8 mb-2">Your Canopy Calculator</h1>
-            <p className="text-base md:text-lg text-gray-700 max-w-xs md:max-w-2xl mx-auto">Get a ballpark estimate for your tree services. Fill out the form below to receive a detailed quote.</p>
-          </div>
-          <img 
-            src="/ICA-400.png" 
-            alt="ICA Certification" 
-            className="h-20 w-auto md:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2 mt-4 md:mt-0"
+      <header className="w-full bg-white border-b border-gray-100">
+        {/* 3D Logo banner */}
+        <div className="w-full bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img
+            src="/3D Logo.jpg"
+            alt="Company Logo Banner"
+            className="w-full min-h-[120px] md:min-h-[180px] object-contain"
           />
         </div>
-        {/* Optional: Add a title/subtitle below the logos */}
-        
+
+        {/* Main header content */}
+        <div className="w-full px-4 md:px-10 py-4 md:py-6 flex items-center justify-between">
+          {/* Mobile layout - only Asset1 logo left of text */}
+          <div className="md:hidden flex items-center gap-4 w-full">
+            <img
+              src="/Asset 1.png"
+              alt="Golden Rule Logo"
+              className="h-20 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
+            />
+            <div className="flex-1 text-center">
+              <h1 className="text-xl font-extrabold text-gray-800 mb-1">Canopy Calculator</h1>
+              <p className="text-sm text-gray-700">
+                Get a ballpark estimate for your tree services.
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop layout - all elements */}
+          <div className="hidden md:flex w-full items-center gap-8 lg:gap-12 justify-between">
+            <img
+              src="/Asset 1.png"
+              alt="Golden Rule Logo"
+              className="h-28 w-auto lg:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2"
+            />
+
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-800 mb-2">Canopy Calculator</h1>
+              <p className="text-base lg:text-lg text-gray-700 max-w-md lg:max-w-xl mx-auto">
+                Get a ballpark estimate for your tree services. Fill out the form below to receive a detailed quote.
+              </p>
+            </div>
+
+            <img
+              src="/ICA-400.png"
+              alt="ICA Certification"
+              className="h-28 w-auto lg:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2"
+            />
+          </div>
+        </div>
       </header>
 
       <div className="py-8 px-4">
@@ -223,7 +255,7 @@ export default function App() {
                           }>
                             <div className="text-center">
                               <div className="text-3xl mb-2">
-                                {loc === 'front' ? '🏡' : loc === 'side' ? '➡️' : '🏞️'}
+                                {loc === 'front yard' ? '🏡' : loc === 'side yard' ? '➡️' : '🏞️'}
                               </div>
                               <div className="font-semibold text-lg capitalize">{loc}</div>
                             </div>
@@ -270,7 +302,7 @@ export default function App() {
                       <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">
                         🔧
                       </span>
-                      Removal
+                      Services Required
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {serviceTypeOptions.map((service) => (
@@ -292,11 +324,11 @@ export default function App() {
                         `}>
                             <div className="text-center">
                               <div className="text-3xl mb-2">
-                                {service === 'tree trim' ? '🌳' : service === 'remove stump' ? '🪓' : '🌳🪓'}
+                                {service === 'tree trim' ? '🌳' : service === 'tree removal' ? '🪓' : '🌳🪓'}
                               </div>
                               <div className="font-semibold text-lg capitalize">{service}</div>
                               <div className="text-sm mt-1">
-                                {service === 'tree trim' ? 'Tree trimming only' : service === 'remove stump' ? 'Stump removal only' : 'Tree trimming & stump removal'}
+                                {service === 'tree trim' ? 'Tree trimming only' : service === 'tree removal' ? 'Tree removal only' : 'Tree trimming & stump removal'}
                               </div>
                             </div>
                           </div>
@@ -417,7 +449,7 @@ export default function App() {
                         </h4>
                         <div className="flex items-center">
                           <span className="text-2xl mr-2">
-                            {serviceType === 'tree trim' ? '🌳' : serviceType === 'remove stump' ? '🪓' : '🌳🪓'}
+                            {serviceType === 'tree trim' ? '🌳' : serviceType === 'tree removal' ? '🪓' : '🌳🪓'}
                           </span>
                           <span className="capitalize font-medium">{serviceType}</span>
                         </div>
@@ -446,7 +478,7 @@ export default function App() {
                         </h4>
                         <div className="flex items-center">
                           <span className="text-2xl mr-2">
-                            {location === 'front' ? '🏡' : location === 'side' ? '➡️' : '🏞️'}
+                            {location === 'front yard' ? '🏡' : location === 'side yard' ? '➡️' : '🏞️'}
                           </span>
                           <span className="capitalize font-medium">{location}</span>
                         </div>
@@ -498,7 +530,7 @@ export default function App() {
                       className="h-16 w-auto rounded-lg"
                     />
                     <div>
-                      <h3 className="font-bold text-gray-800">Your Canopy Calculator</h3>
+                      <h3 className="font-bold text-gray-800">Canopy Calculator</h3>
                       <p className="text-sm text-gray-600">Professional Tree Services</p>
                     </div>
                   </div>
@@ -507,13 +539,13 @@ export default function App() {
                   </p>
                   <div className="flex items-center space-x-4">
                     <img
-                      src="/ICA-400.png"
-                      alt="ICA Certification"
+                      src="/Asset 1.png"
+                      alt="Company Asset"
                       className="h-12 w-auto opacity-90"
                     />
                     <img
-                      src="/Asset 1.png"
-                      alt="Company Asset"
+                      src="/ICA-400.png"
+                      alt="ICA Certification"
                       className="h-12 w-auto opacity-90"
                     />
                   </div>
@@ -523,10 +555,11 @@ export default function App() {
                 <div>
                   <h4 className="font-semibold text-gray-800 mb-3">Our Services</h4>
                   <ul className="space-y-2 text-sm text-gray-600">
-                    <li>Tree Trimming</li>
-                    <li>Stump Removal</li>
-                    <li>Emergency Services</li>
-                    <li>Arborist Consultation</li>
+                    <li>Free Estimates</li>
+                    <li>Trimmings and Removals</li>
+                    <li>Health Assessments</li>
+                    <li>Disease Treatment</li>
+                    <li>Stump Grinding</li>
                   </ul>
                 </div>
 
@@ -534,8 +567,8 @@ export default function App() {
                 <div>
                   <h4 className="font-semibold text-gray-800 mb-3">Contact Info</h4>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <p>📞 (555) 123-4567</p>
-                    <p>📧 info@canopycalculator.com</p>
+                    <p>📞 435-851-7683 & 801-472-1286</p>
+                    <p>📧 Jeremy@goldenruletrees.com</p>
                     <p>📍 Serving Local Area</p>
                     <p>🕒 24/7 Emergency Service</p>
                   </div>
@@ -557,7 +590,7 @@ export default function App() {
           </footer>
         </div>
 
-        {/* Price Estimate Modal */}
+        {/* Modal for Ballpark Estimate */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] transform transition-all duration-300 scale-100 flex flex-col">
@@ -565,14 +598,15 @@ export default function App() {
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
+                    {/* 10. Use circle logo in modal */}
                     <img
-                      src="/3D Logo.jpg"
-                      alt="Company Logo"
+                      src="/Asset 1.png"
+                      alt="Golden Rule Logo"
                       className="h-14 w-auto rounded-lg"
                     />
                     <h2 className="text-xl font-bold flex items-center">
-                      <span className="mr-2">💰</span>
-                      Price Estimate
+                      <span className="mr-2">😊</span>
+                      Ballpark Estimate
                     </h2>
                   </div>
                   <button
@@ -585,7 +619,6 @@ export default function App() {
                   </button>
                 </div>
               </div>
-
               {/* Modal Body - Scrollable */}
               <div className="p-4 flex-1 overflow-y-auto">
                 {/* Price Display */}
@@ -595,7 +628,6 @@ export default function App() {
                   </div>
                   <p className="text-sm text-gray-600">Estimated Total Cost</p>
                 </div>
-
                 {/* Project Details - Compact */}
                 <div className="space-y-2 mb-4">
                   <h3 className="font-semibold text-gray-800 mb-2 text-sm">Project Details:</h3>
@@ -654,16 +686,10 @@ export default function App() {
                   * This is an estimate. Final price may vary based on site conditions and additional requirements.
                 </p>
               </div>
-
               {/* Action Buttons - Fixed at bottom */}
               <div className="p-4 border-t border-gray-100 flex-shrink-0">
                 <div className="space-y-2">
-                  <button
-                    onClick={closeModal}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm"
-                  >
-                    Get This Quote
-                  </button>
+                  {/* 8. Remove 'Get This Quote' button */}
                   <button
                     onClick={closeModal}
                     className="w-full bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm"
