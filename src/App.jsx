@@ -138,13 +138,13 @@ export default function App() {
 
         {/* Main header content */}
         <div className="w-full px-4 md:px-10 py-4 md:py-6 flex items-center justify-between">
-          {/* Mobile layout - only Asset1 logo left of text */}
-          <div className="md:hidden flex items-center gap-4 w-full">
-            <img
-              src="/Asset 1.png"
-              alt="Golden Rule Logo"
-              className="h-20 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
-            />
+                     {/* Mobile layout - only Asset1 logo left of text */}
+           <div className="md:hidden flex items-center gap-4 w-full">
+             <img
+               src="/google5star.jpg"
+               alt="Google 5 Star Logo"
+               className="h-20 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
+             />
             <div className="flex-1 text-center">
               <h1 className="text-xl font-extrabold text-gray-800 mb-1">Canopy Calculator</h1>
               <p className="text-sm text-gray-700">
@@ -155,11 +155,11 @@ export default function App() {
 
           {/* Desktop layout - all elements */}
           <div className="hidden md:flex w-full items-center gap-8 lg:gap-12 justify-between">
-            <img
-              src="/Asset 1.png"
-              alt="Golden Rule Logo"
-              className="h-28 w-auto lg:h-32 opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-2"
-            />
+          <img
+               src="/google5star.jpg"
+               alt="Google 5 Star Logo"
+               className="h-20 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
+             />
 
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-800 mb-2">Canopy Calculator</h1>
@@ -325,7 +325,7 @@ export default function App() {
                             className="sr-only"
                           />
                           <div className={`
-                          cursor-pointer p-6 rounded-xl border-2 transition-all duration-200
+                          cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 h-32 flex items-center justify-center
                           ${serviceType === service
                               ? 'border-blue-500 bg-blue-50 text-blue-700'
                               : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100'
@@ -335,9 +335,8 @@ export default function App() {
                               <div className="text-3xl mb-2">
                                 {service === 'tree trim' ? '🌳' : service === 'tree removal' ? '🪓' : '🌳🪓'}
                               </div>
-                              <div className="font-semibold text-lg capitalize">{service}</div>
-                              <div className="text-sm mt-1">
-                                {service === 'tree trim' ? 'Tree trimming only' : service === 'tree removal' ? 'Tree removal only' : 'Tree & stump removal'}
+                              <div className="font-semibold text-lg capitalize">
+                                {service === 'tree trim' ? 'Tree Trimming' : service === 'tree removal' ? 'Tree Removal' : 'Tree And Stump Removal'}
                               </div>
                             </div>
                           </div>
