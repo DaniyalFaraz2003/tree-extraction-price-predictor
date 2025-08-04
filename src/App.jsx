@@ -33,9 +33,10 @@ export default function App() {
     // Find the correct index for circumference
     const circumference = parseFloat(formData.circumference);
     if (isNaN(circumference)) return 0;
+    
     let index = -1;
-    for (let i = 0; i < Object.keys(processedData['Size(In)']).length; i++) {
-      const range = processedData['Size(In)'][i.toString()];
+    for (let i = 0; i < Object.keys(processedData['Size']).length; i++) {
+      const range = processedData['Size'][i.toString()];
       const [min, max] = range.split('-').map(Number);
       if (circumference >= min && circumference <= max) {
         index = i;
@@ -43,39 +44,47 @@ export default function App() {
       }
     }
     if (index === -1) return 0;
+    
     let total = 0;
-    // Add base price (Leafy or Pokey)
-    const treeKey = formData.treeType ? (formData.treeType.charAt(0).toUpperCase() + formData.treeType.slice(1)) : '';
-    if (treeKey && processedData[treeKey] && processedData[treeKey][index.toString()]) {
-      total += processedData[treeKey][index.toString()];
+    
+    // Get base price using tree type and service type
+    let serviceKey = formData.serviceType === 'tree and stump removal' ? 'remove' : formData.serviceType.split(' ')[1]; // 'trim' or 'remove'
+    if (serviceKey === "removal") serviceKey = "remove";
+    const basePriceKey = `${formData.treeType} ${serviceKey}`;
+    
+    if (processedData[basePriceKey] && processedData[basePriceKey][index.toString()]) {
+      total += processedData[basePriceKey][index.toString()];
     }
-    // Add obstacle prices
+    
+    // Add obstacle percentages
     if (Array.isArray(formData.obstacles)) {
       formData.obstacles.forEach(obstacle => {
-        let key = obstacle;
-        if (key === 'house' || key === 'shed') key = 'House shed';
-        key = `${treeKey} - ${key.charAt(0).toUpperCase() + key.slice(1)}`;
-        if (processedData[key] && processedData[key][index.toString()]) {
-          total += processedData[key][index.toString()];
+        const obstacleKey = `${formData.treeType} - ${serviceKey} - ${obstacle}`;
+        if (processedData[obstacleKey] && processedData[obstacleKey][index.toString()]) {
+          total += processedData[obstacleKey][index.toString()];
         }
       });
     }
-    // Add location price
+    
+    // Add location percentage
     if (formData.location) {
-      let locKey = formData.location.charAt(0).toUpperCase() + formData.location.slice(1);
-      let key = `${treeKey} - ${locKey}`;
-      if (processedData[key] && processedData[key][index.toString()]) {
-        total += processedData[key][index.toString()];
+      // Convert location names to match data format
+      let locationKey = formData.location;
+      if (formData.location === 'front yard') locationKey = 'none'; // front yard uses house data
+      if (formData.location === 'side yard') locationKey = 'side';
+      if (formData.location === 'backyard') locationKey = 'back';
+      
+      const locationDataKey = `${formData.treeType} - ${serviceKey} - ${locationKey}`;
+      if (processedData[locationDataKey] && processedData[locationDataKey][index.toString()]) {
+        total += processedData[locationDataKey][index.toString()];
       }
     }
-    // Add stump removal if needed
-    if (formData.serviceType) {
-      if ((formData.serviceType === 'tree and stump removal') && processedData['STUMP Removal'] && processedData['STUMP Removal'][index.toString()]) {
-        total += processedData['STUMP Removal'][index.toString()];
-      }
-      // If only tree removal, do not add stump removal
-      // If only tree trim, do not add stump removal
+    
+    // Add stump removal if service is "tree and stump removal"
+    if (formData.serviceType === 'tree and stump removal' && processedData['stump'] && processedData['stump'][index.toString()]) {
+      total += processedData['stump'][index.toString()];
     }
+    
     return Math.round(total);
   };
 
@@ -328,7 +337,7 @@ export default function App() {
                               </div>
                               <div className="font-semibold text-lg capitalize">{service}</div>
                               <div className="text-sm mt-1">
-                                {service === 'tree trim' ? 'Tree trimming only' : service === 'tree removal' ? 'Tree removal only' : 'Tree trimming & stump removal'}
+                                {service === 'tree trim' ? 'Tree trimming only' : service === 'tree removal' ? 'Tree removal only' : 'Tree & stump removal'}
                               </div>
                             </div>
                           </div>
