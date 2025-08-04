@@ -143,7 +143,7 @@ export default function App() {
              <img
                src="/google5star.jpg"
                alt="Google 5 Star Logo"
-               className="h-20 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
+               className="h-32 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
              />
             <div className="flex-1 text-center">
               <h1 className="text-xl font-extrabold text-gray-800 mb-1">Canopy Calculator</h1>
@@ -158,7 +158,7 @@ export default function App() {
           <img
                src="/google5star.jpg"
                alt="Google 5 Star Logo"
-               className="h-20 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
+               className="h-28 w-auto opacity-95 drop-shadow-lg object-contain rounded-xl bg-white p-1"
              />
 
             <div className="flex-1 flex flex-col items-center justify-center text-center">
